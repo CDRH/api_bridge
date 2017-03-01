@@ -2,6 +2,10 @@ require 'uri'
 
 module ApiBridge
 
+  def self.encode_html(string)
+    return URI.encode(string)
+  end
+
   def self.escape_values(options)
     # TODO what kind of escaping or sanitizing do we
     # want to do here?
@@ -28,7 +32,7 @@ module ApiBridge
 
   def self.is_url?(url)
     # rely on uri gem to do the heavy lifting
-    result = url =~ /\A#{URI::regexp(['http', 'https'])}\z/
+    result = url =~ /\A#{URI::Parser.new.make_regexp(['http', 'https'])}\z/
     # convert to boolean
     return !!result
   end

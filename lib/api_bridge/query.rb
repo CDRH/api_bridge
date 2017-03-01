@@ -1,12 +1,12 @@
 require 'json'
 require 'rest-client'
+require 'uri'
 
 module ApiBridge
 
   class Query
     attr_accessor :url
     attr_accessor :facet_fields
-    # TODO not sure that these need to be accessible
     attr_accessor :options
 
     @@all_options = %w(q, f, facet, hl, min, num, q, sort, page, start, facet_sort)
@@ -20,20 +20,39 @@ module ApiBridge
       if ApiBridge.is_url?(url)
         @url = url
         # defaults
+        # TODO how to incorporate facets here and facets from request
+        # into query?  See also: f[] field
         @facet_fields = facets
         @options = set_default_options(options)
+        @options["facet"] = facets
       else
         raise "Provided URL must be valid! #{url}"
       end
     end
 
     def create_url(options={})
-      query_string = options.map { |k, v| "#{k}=#{v}" }.join("&")
+      # Note: URI has encode_www_form method which nearly
+      # can be used, except that it doesn't add [] after
+      # arrays, so rails will not parse all of the information
+      query = []
+      options.each do |k, v|
+        if v.class == Array
+          v.each do |item|
+            query << "#{k}[]=#{item}"
+          end
+        else
+          query << "#{k}=#{v}"
+        end
+      end
+      query_string = query.join("&")
       url = "#{@url}/items?#{query_string}"
-      if ApiBridge.is_url?(url)
-        return url
+      # TODO apparently things URI.encode uses are deprecated
+      # even though their docs don't mention it guhhhh
+      encoded = URI.encode(url)
+      if ApiBridge.is_url?(encoded)
+        return encoded
       else
-        raise "Invalid URL created for query: #{url}"
+        raise "Invalid URL created for query: #{encoded}"
       end
     end
 
@@ -43,6 +62,9 @@ module ApiBridge
     end
 
     def get_item_by_id(id)
+      # TODO whoa I'm an idiot, maybe try using the endpoint specifically for items???
+      options = { "f" => ["identifier|#{id}"] }
+      _query options
       # TODO should make it very easy to get a single item back
     end
 
@@ -51,25 +73,18 @@ module ApiBridge
     end
 
     # overrides the CURRENTLY SET options, not the vanilla default options
-    def set_default_options(options)
-      @options = ApiBridge.override_options(@options, options)
+    def set_default_options(requested)
+      existing = defined?(@options) ? @options : @@default_options
+      @options = ApiBridge.override_options(existing, requested)
     end
 
     def query(options={})
-      puts "receiving: #{options}"
-      options = _prepare_options(options)
-      puts "afer preparing #{options}"
-      # override defaults with requested options
-      req_params = ApiBridge.override_options(@options, options)
-      # create and send the request
-      url = create_url(req_params)
-      res = send_request(url)
-      # return response format
-      return ApiBridge::Response.new(res, url, req_params)
+      _query options
     end
 
     def send_request(url)
       begin
+        ApiBridge.logger.info("sending request to #{url}")
         res = RestClient.get(url)
         return JSON.parse(res.body)
       rescue => e
@@ -94,11 +109,27 @@ module ApiBridge
 
     def _prepare_options(options)
       opts = ApiBridge.clone_and_stringify_options(options)
+      # remove parameters which rails adds
+      opts.delete("controller")
+      opts.delete("action")
+      opts.delete("utf8")
+      opts.delete("commit")
       # remove page and replace with start
       opts = _calc_start(opts)
       # add escapes for special characters
       opts = ApiBridge.escape_values(opts)
       return opts
+    end
+
+    def _query(options={})
+      options = _prepare_options(options)
+      # override defaults with requested options
+      req_params = ApiBridge.override_options(@options, options)
+      # create and send the request
+      url = create_url(req_params)
+      res = send_request(url)
+      # return response format
+      return ApiBridge::Response.new(res, url, req_params)
     end
 
   end  # end of Query class
