@@ -7,7 +7,7 @@ The Center for Digital Research in the Humanities (CDRH) has marked up many docu
 To work on and test this gem locally, run the following:
 
 ```
-gem build name.gemspec
+gem build api_bridge.gemspec
 rake install
 # or gem install /path/to/gem/pkg/api_bridge-0.1.0.gem
 ```
@@ -15,7 +15,7 @@ rake install
 Then in a project's gemfile:
 
 ```
-gem 'name', :path => 'path/to/gem'
+gem 'api_bridge', :path => 'path/to/gem'
 ```
 
 ## Installation
