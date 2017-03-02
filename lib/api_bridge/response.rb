@@ -28,7 +28,7 @@ module ApiBridge
     end
 
     def pages
-      if self.count
+      if self.count && @req_opts.has_key?("rows")
         return (self.count.to_f/@req_opts["rows"]).ceil
       else
         return 0

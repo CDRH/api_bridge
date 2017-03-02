@@ -30,7 +30,7 @@ module ApiBridge
       end
     end
 
-    def create_url(options={})
+    def create_items_url(options={})
       # Note: URI has encode_www_form method which nearly
       # can be used, except that it doesn't add [] after
       # arrays, so rails will not parse all of the information
@@ -62,10 +62,9 @@ module ApiBridge
     end
 
     def get_item_by_id(id)
-      # TODO whoa I'm an idiot, maybe try using the endpoint specifically for items???
-      options = { "f" => ["identifier|#{id}"] }
-      _query options
-      # TODO should make it very easy to get a single item back
+      url = "#{@url}/item/#{id}"
+      res = send_request url
+      return ApiBridge::Response.new(res, url, { "id" => id })
     end
 
     def reset_options
@@ -126,7 +125,7 @@ module ApiBridge
       # override defaults with requested options
       req_params = ApiBridge.override_options(@options, options)
       # create and send the request
-      url = create_url(req_params)
+      url = create_items_url(req_params)
       res = send_request(url)
       # return response format
       return ApiBridge::Response.new(res, url, req_params)
