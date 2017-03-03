@@ -23,7 +23,7 @@ module ApiBridge
         # TODO how to incorporate facets here and facets from request
         # into query?  See also: f[] field
         @facet_fields = facets
-        @options = set_default_options(options)
+        @options = override_options(options)
         @options["facet"] = facets
       else
         raise "Provided URL must be valid! #{url}"
@@ -67,14 +67,14 @@ module ApiBridge
       return ApiBridge::Response.new(res, url, { "id" => id })
     end
 
-    def reset_options
-      @options = @@default_options
-    end
-
     # overrides the CURRENTLY SET options, not the vanilla default options
-    def set_default_options(requested)
+    def override_options(requested)
       existing = defined?(@options) ? @options : @@default_options
       @options = ApiBridge.override_options(existing, requested)
+    end
+
+    def reset_options
+      @options = @@default_options
     end
 
     def query(options={})
