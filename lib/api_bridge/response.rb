@@ -5,7 +5,7 @@ module ApiBridge
     attr_reader :req_url
     attr_reader :res
 
-    def initialize(res, url, options)
+    def initialize res, url, options
       @req_opts = options
       @req_url = url
       @res = res

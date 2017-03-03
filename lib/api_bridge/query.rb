@@ -16,21 +16,21 @@ module ApiBridge
       "start" => 0
     }
 
-    def initialize(url, facets=[], options={})
+    def initialize url, facets=[], options={}
       if ApiBridge.is_url?(url)
         @url = url
         # defaults
         # TODO how to incorporate facets here and facets from request
         # into query?  See also: f[] field
         @facet_fields = facets
-        @options = override_options(options)
+        @options = override_options options
         @options["facet"] = facets
       else
         raise "Provided URL must be valid! #{url}"
       end
     end
 
-    def create_items_url(options={})
+    def create_items_url options={}
       # Note: URI has encode_www_form method which nearly
       # can be used, except that it doesn't add [] after
       # arrays, so rails will not parse all of the information
@@ -56,19 +56,19 @@ module ApiBridge
       end
     end
 
-    def get_facets(facets=[])
+    def get_facets facets=[]
       # TODO should make it easy to retrieve the facets ONLY
       # by overriding some things here, like page / num / etc
     end
 
-    def get_item_by_id(id)
+    def get_item_by_id id
       url = "#{@url}/item/#{id}"
       res = send_request url
       return ApiBridge::Response.new(res, url, { "id" => id })
     end
 
     # overrides the CURRENTLY SET options, not the vanilla default options
-    def override_options(requested)
+    def override_options requested
       existing = defined?(@options) ? @options : @@default_options
       @options = ApiBridge.override_options(existing, requested)
     end
@@ -77,11 +77,11 @@ module ApiBridge
       @options = @@default_options
     end
 
-    def query(options={})
+    def query options={}
       _query options
     end
 
-    def send_request(url)
+    def send_request url
       begin
         ApiBridge.logger.info("sending request to #{url}")
         res = RestClient.get(url)
@@ -93,7 +93,7 @@ module ApiBridge
 
     private
 
-    def _calc_start(options)
+    def _calc_start options
       # if start is specified by user then don't override with page
       page = ApiBridge.set_page(options["page"])
       # remove page from options
@@ -106,7 +106,7 @@ module ApiBridge
       return options
     end
 
-    def _prepare_options(options)
+    def _prepare_options options
       opts = ApiBridge.clone_and_stringify_options(options)
       # remove parameters which rails adds
       opts.delete("controller")
@@ -114,19 +114,19 @@ module ApiBridge
       opts.delete("utf8")
       opts.delete("commit")
       # remove page and replace with start
-      opts = _calc_start(opts)
+      opts = _calc_start opts
       # add escapes for special characters
       opts = ApiBridge.escape_values(opts)
       return opts
     end
 
-    def _query(options={})
-      options = _prepare_options(options)
+    def _query options={}
+      options = _prepare_options options
       # override defaults with requested options
       req_params = ApiBridge.override_options(@options, options)
       # create and send the request
-      url = create_items_url(req_params)
-      res = send_request(url)
+      url = create_items_url req_params
+      res = send_request url
       # return response format
       return ApiBridge::Response.new(res, url, req_params)
     end
