@@ -13,7 +13,8 @@ module ApiBridge
 
     @@default_options = {
       "num" => 50,
-      "start" => 0
+      "start" => 0,
+      "facet" => []
     }
 
     def initialize url, facets=[], options={}
@@ -28,6 +29,10 @@ module ApiBridge
       else
         raise "Provided URL must be valid! #{url}"
       end
+    end
+
+    def create_item_url id
+      return "#{@url}/item/#{id}"
     end
 
     def create_items_url options={}
@@ -56,13 +61,8 @@ module ApiBridge
       end
     end
 
-    def get_facets facets=[]
-      # TODO should make it easy to retrieve the facets ONLY
-      # by overriding some things here, like page / num / etc
-    end
-
     def get_item_by_id id
-      url = "#{@url}/item/#{id}"
+      url = create_item_url id
       res = send_request url
       return ApiBridge::Response.new(res, url, { "id" => id })
     end
@@ -74,7 +74,7 @@ module ApiBridge
     end
 
     def reset_options
-      @options = @@default_options
+      @options = @@default_options.clone
     end
 
     def query options={}
@@ -115,6 +115,8 @@ module ApiBridge
       opts.delete("commit")
       # remove page and replace with start
       opts = _calc_start opts
+      # remove .year from the middle of date filters for api's sake
+      opts["f"].map { |f| f.slice!(".year") } if opts.has_key?("f")
       # add escapes for special characters
       opts = ApiBridge.escape_values(opts)
       return opts

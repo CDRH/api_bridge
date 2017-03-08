@@ -8,6 +8,11 @@ class QueryTest < Minitest::Test
     @api = ApiBridge::Query.new(@fake_url)
   end
 
+  def test_create_item_url
+    url = @api.create_item_url "cat.let0001"
+    assert_equal url, "#{@fake_url}/item/cat.let0001"
+  end
+
   def test_create_items_url
     # basic
     url = @api.create_items_url()
@@ -44,6 +49,20 @@ class QueryTest < Minitest::Test
     assert_equal @api.options, {}
     @api.reset_options
     assert_equal @api.options, ApiBridge::Query.class_variable_get("@@default_options")
+    @api.options = {}
+    # ruby syntax highlighting gets mad if you don't wrap the below in parenthesis because of the {}
+    refute_equal({}, ApiBridge::Query.class_variable_get("@@default_options"))
+  end
+
+  def test_override_options
+    # override default
+    overridden = @api.override_options({"num" => 50})
+    assert_equal overridden, { "num" => 50, "start" => 0, "facet" => [] }
+
+    # override previously set
+    @api.options = { "page" => 2, "facet" => ["thing"] }
+    overridden = @api.override_options({ "page" => 3, "new_field" => "thing" })
+    assert_equal overridden, { "page"=>3, "facet"=>["thing"], "new_field"=>"thing" }
   end
 
 end

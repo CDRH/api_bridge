@@ -6,6 +6,14 @@ module ApiBridge
     return URI.encode(string)
   end
 
+  def self.calculate_page count, rows
+    if count && rows
+      return (count.to_f/rows.to_i).ceil
+    else
+      return 1
+    end
+  end
+
   def self.escape_values options
     # TODO what kind of escaping or sanitizing do we
     # want to do here?
@@ -23,8 +31,8 @@ module ApiBridge
     if aOpts.class == Hash
       opts_hash = aOpts.clone
     elsif aOpts.class == ActionController::Parameters
-      # only allow through "safe" params and convert to hash
-      opts_hash = aOpts.to_unsafe_h
+      # TODO only allow through "safe" params and convert to hash
+      opts_hash = aOpts.deep_dup.to_unsafe_h
     end
     # ensure that there are no symbols hiding in there
     return Hash[opts_hash.map { |k, v| [k.to_s, v] }]
