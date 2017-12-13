@@ -2,16 +2,20 @@ require 'uri'
 
 module ApiBridge
 
-  def self.encode_html string
-    return URI.encode(string)
-  end
-
   def self.calculate_page count, rows
     if count && rows
       return (count.to_f/rows.to_i).ceil
     else
       return 1
     end
+  end
+
+  def self.encode url
+    encoded = URI.encode(url)
+    # semicolons are not caught in the above step
+    encoded = encoded.gsub(";", "%3B")
+    # encoded semicolons may accidentally have had the % double encoded
+    encoded.gsub("%253B", "%3B")
   end
 
   def self.escape_values options

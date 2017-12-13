@@ -3,18 +3,17 @@ require_relative "../lib/api_bridge.rb"
 
 class HelperTest < Minitest::Test
 
-  def test_encode_html
-    # TODO look into why the ampersand and quotation marks are not encoded?
-    unencoded = "this is a 'string' & some stuff"
-    encoded = ApiBridge.encode_html(unencoded)
-    assert_equal encoded, "this%20is%20a%20'string'%20&%20some%20stuff"
-  end
-
   def test_calculate_page
     assert_equal ApiBridge.calculate_page(101, 20), 6
     assert_equal ApiBridge.calculate_page(1, 20), 1
     assert_equal ApiBridge.calculate_page(9, 3), 3
     assert_equal ApiBridge.calculate_page(57, 5), 12
+  end
+
+  def test_encode
+    assert_equal "Cather%3B%20Pound", ApiBridge.encode("Cather; Pound")
+    assert_equal "Cather,%20Pound", ApiBridge.encode("Cather, Pound")
+    assert_equal "Cather%3B%20Pound", ApiBridge.encode("Cather%3B Pound")
   end
 
   def test_escape_values
