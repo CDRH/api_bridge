@@ -16,12 +16,12 @@ class QueryTest < Minitest::Test
   def test_create_items_url
     # basic
     url = @api.create_items_url()
-    assert_equal url, "#{@fake_url}/items?"
+    assert_equal url, "#{@fake_url}/items"
 
     # with f[] and q
     opts = { "f" => ["thing1", "thing2"], "q" => "water" }
     url = @api.create_items_url(opts)
-    assert_equal url, "#{@fake_url}/items?f[]=thing1&f[]=thing2&q=water"
+    assert_equal "#{@fake_url}/items?f[]=thing1&f[]=thing2&q=water", url
 
     # with f[], facet[], start, and num
     opts = {
@@ -30,17 +30,17 @@ class QueryTest < Minitest::Test
       "start" => 21, "num" => 20
     }
     url = @api.create_items_url(opts)
-    assert_equal url, "#{@fake_url}/items?f[]=subcategory%7Cworks&facet[]=title&facet[]=name&start=21&num=20"
+    assert_equal "#{@fake_url}/items?f[]=subcategory%7Cworks&facet[]=title&facet[]=name&start=21&num=20", url
 
     # with nested f[]
     opts = { "f" => ["creator.name|Willa, Cather"] }
     url = @api.create_items_url(opts)
-    assert_equal url, "#{@fake_url}/items?f[]=creator.name%7CWilla,%20Cather"
+    assert_equal "#{@fake_url}/items?f[]=creator.name%7CWilla%2C+Cather", url
 
     # with multiple sorts
     opts = { "sort" => ["title|asc", "name|desc"] }
     url = @api.create_items_url(opts)
-    assert_equal url, "#{@fake_url}/items?sort[]=title%7Casc&sort[]=name%7Cdesc"
+    assert_equal "#{@fake_url}/items?sort[]=title%7Casc&sort[]=name%7Cdesc", url
   end
 
   def test_reset_options

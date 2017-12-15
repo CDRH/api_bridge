@@ -11,11 +11,17 @@ module ApiBridge
   end
 
   def self.encode url
-    encoded = URI.encode(url)
-    # semicolons are not caught in the above step
-    encoded = encoded.gsub(";", "%3B")
-    # encoded semicolons may accidentally have had the % double encoded
-    encoded.gsub("%253B", "%3B")
+    # Split components of URL so we may encode only the query string, index 7
+    components = URI.split(url).map.with_index { |component, i|
+      i != 7 || component == "" ? component : encode_query_params(component)
+    }
+
+    # Assume URLs are hierarchical, i.e. (scheme)://... not opaque (scheme):...
+    url = "#{components[0]}://" << components[1..5].join("")
+    url << "?#{components[7]}" if components[7] != ""
+    url << components[8] if components[8]
+
+    url
   end
 
   def self.escape_values options
@@ -65,5 +71,15 @@ module ApiBridge
       end
     end
     return new_page
+  end
+
+  private
+
+  def self.encode_query_params(query_string)
+    query_string.split(/[&]/).map { |param|
+      name, value = param.split("=")
+
+      "#{name}=#{URI.encode_www_form_component(value)}"
+    }.join("&")
   end
 end

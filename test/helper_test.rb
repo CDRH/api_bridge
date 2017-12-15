@@ -11,9 +11,12 @@ class HelperTest < Minitest::Test
   end
 
   def test_encode
-    assert_equal "Cather%3B%20Pound", ApiBridge.encode("Cather; Pound")
-    assert_equal "Cather,%20Pound", ApiBridge.encode("Cather, Pound")
-    assert_equal "Cather%3B%20Pound", ApiBridge.encode("Cather%3B Pound")
+    fake_url = "http://something.unl.edu/?param="
+
+    assert_equal "#{fake_url}Cather%3B+Pound",
+      ApiBridge.encode("#{fake_url}Cather; Pound")
+    assert_equal "#{fake_url}Cather%2C+Pound",
+      ApiBridge.encode("#{fake_url}Cather, Pound")
   end
 
   def test_escape_values
