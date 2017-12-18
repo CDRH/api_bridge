@@ -11,17 +11,13 @@ module ApiBridge
   end
 
   def self.encode url
-    # Split components of URL so we may encode only the query string, index 7
-    components = URI.split(url).map.with_index { |component, i|
-      i != 7 || component == "" ? component : encode_query_params(component)
-    }
-
-    # Assume URLs are hierarchical, i.e. (scheme)://... not opaque (scheme):...
-    url = "#{components[0]}://" << components[1..5].join("")
-    url << "?#{components[7]}" if components[7] != ""
-    url << components[8] if components[8]
-
-    url
+    # Split components of URL so we may encode only the query string
+    request_url, query = url.split("?")
+    if query
+      encoded = encode_query_params(query)
+      request_url << "?#{encoded}"
+    end
+    request_url
   end
 
   def self.escape_values options
