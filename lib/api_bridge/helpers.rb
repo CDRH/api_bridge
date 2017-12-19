@@ -2,16 +2,22 @@ require 'uri'
 
 module ApiBridge
 
-  def self.encode_html string
-    return URI.encode(string)
-  end
-
   def self.calculate_page count, rows
     if count && rows
       return (count.to_f/rows.to_i).ceil
     else
       return 1
     end
+  end
+
+  def self.encode url
+    # Split components of URL so we may encode only the query string
+    request_url, query = url.split("?")
+    if query
+      encoded = encode_query_params(query)
+      request_url << "?#{encoded}"
+    end
+    request_url
   end
 
   def self.escape_values options
@@ -61,5 +67,15 @@ module ApiBridge
       end
     end
     return new_page
+  end
+
+  private
+
+  def self.encode_query_params(query_string)
+    query_string.split(/[&]/).map { |param|
+      name, value = param.split("=")
+
+      "#{name}=#{URI.encode_www_form_component(value)}"
+    }.join("&")
   end
 end

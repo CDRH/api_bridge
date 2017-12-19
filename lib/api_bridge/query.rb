@@ -51,9 +51,7 @@ module ApiBridge
       end
       query_string = query.join("&")
       url = "#{@url}/items?#{query_string}"
-      # TODO apparently things URI.encode uses are deprecated
-      # even though their docs don't mention it guhhhh
-      encoded = URI.encode(url)
+      encoded = ApiBridge.encode(url)
       if ApiBridge.is_url?(encoded)
         return encoded
       else
