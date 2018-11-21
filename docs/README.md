@@ -1,8 +1,4 @@
-[Back to documentation page for entire system](../../README.md)
-
 # ApiBridge
-
-[APIBridge Repository](https://github.com/CDRH/api_bridge)
 
 The Center for Digital Research in the Humanities (CDRH) has marked up many documents with TEI, Dublin Core, VRA, and other encoding standards. These documents are indexed into an API. This gem reduces repeating logic when powering sites with the API's information.
 
