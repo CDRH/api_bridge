@@ -14,3 +14,5 @@
 mkmf.log
 *.yml
 !*.example.yml
+
+.DS_Store
