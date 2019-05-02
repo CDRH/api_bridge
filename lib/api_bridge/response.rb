@@ -28,7 +28,7 @@ module ApiBridge
     end
 
     def pages
-      ApiBridge.calculate_page self.count, @req_opts["rows"]
+      ApiBridge.calculate_page self.count, @req_opts["num"]
     end
   end
 

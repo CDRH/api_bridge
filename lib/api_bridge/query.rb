@@ -24,6 +24,7 @@ module ApiBridge
         # TODO how to incorporate facets here and facets from request
         # into query?  See also: f[] field
         @facet_fields = facets
+        options = _remove_rows(options)
         @options = override_options options
         @options["facet"] = facets
       else
@@ -96,10 +97,10 @@ module ApiBridge
       page = ApiBridge.set_page(options["page"])
       # remove page from options
       options.delete("page")
-      if !options.has_key?("start")
-        # use the page and rows to set a start
-        rows = options.has_key?("rows") ? options["rows"].to_i : @options["rows"].to_i
-        options["start"] = ApiBridge.get_start(page, rows)
+      if !options.key?("start")
+        # use the page and rows to set a start, use default is no num specified
+        num = options.key?("num") ? options["num"].to_i : @options["num"].to_i
+        options["start"] = ApiBridge.get_start(page, num)
       end
       return options
     end
@@ -111,6 +112,7 @@ module ApiBridge
       opts.delete("action")
       opts.delete("utf8")
       opts.delete("commit")
+      opts = _remove_rows(opts)
       # remove page and replace with start
       opts = _calc_start opts
       # remove .year from the middle of date filters for api's sake
@@ -129,6 +131,14 @@ module ApiBridge
       res = send_request url
       # return response format
       return ApiBridge::Response.new(res, url, req_params)
+    end
+
+    def _remove_rows opts={}
+      if opts.key?("rows")
+        opts["num"] = opts["rows"] if !opts.key?("num")
+        opts.delete("rows")
+      end
+      opts
     end
 
   end  # end of Query class

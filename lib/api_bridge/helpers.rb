@@ -26,8 +26,8 @@ module ApiBridge
     return options
   end
 
-  def self.get_start page, rows
-    return (page - 1) * rows
+  def self.get_start page, num
+    return (page - 1) * num
   end
 
   def self.clone_and_stringify_options aOpts
@@ -72,6 +72,7 @@ module ApiBridge
   private
 
   def self.encode_query_params(query_string)
+    # puts "QUERY_STRING: #{query_string}"
     query_string.split(/[&]/).map { |param|
       name, value = param.split("=")
 
